@@ -1,20 +1,18 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Task, TaskStatus } from '@/types/task';
+import { Task, TaskPriority, TaskStatus } from '@/types/task';
 import { TaskTable } from './TaskTable';
 import { TaskCard } from './TaskCard';
 import { DeleteTaskDialog } from './DeleteTaskDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
     SearchIcon,
     RefreshCwIcon,
     FilterIcon,
     InboxIcon,
-    CheckCircle2Icon,
     ListTodoIcon,
 } from 'lucide-react';
 
@@ -23,7 +21,7 @@ interface TaskListProps {
     isLoading: boolean;
     onRefresh: () => Promise<void>;
     onStatusChange: (id: string, newStatus: TaskStatus) => Promise<void>;
-    onPriorityChange: (id: string, newPriority: TaskStatus) => Promise<void>;
+    onPriorityChange?: (id: string, newPriority: TaskPriority) => Promise<void>;
     onDeleteTask: (id: string) => Promise<boolean>;
     updatingTaskId?: string | null;
 }
@@ -35,7 +33,7 @@ export const TaskList: React.FC<TaskListProps> = ({
     isLoading,
     onRefresh,
     onStatusChange,
-
+    onPriorityChange,
     onDeleteTask,
     updatingTaskId,
 }) => {
@@ -223,7 +221,8 @@ export const TaskList: React.FC<TaskListProps> = ({
                     <div className="hidden md:block">
                         <TaskTable
                             tasks={filteredTasks}
-                            onPriorityChange={onStatusChange}
+                            onStatusChange={onStatusChange}
+                            onPriorityChange={onPriorityChange}
                             onDeleteClick={(task) => setTaskToDelete(task)}
                             updatingTaskId={updatingTaskId}
                         />

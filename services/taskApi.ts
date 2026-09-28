@@ -1,4 +1,4 @@
-import { Task, CreateTaskInput, TaskStatus, UpdateTaskInput } from '@/types/task';
+import { Task, CreateTaskInput, TaskStatus, TaskPriority, UpdateTaskInput } from '@/types/task';
 
 const BASE_URL = '/api/tasks';
 
@@ -64,6 +64,13 @@ export async function updateTask(id: string, updates: UpdateTaskInput): Promise<
  */
 export async function updateTaskStatus(id: string, status: TaskStatus): Promise<Task> {
   return updateTask(id, { status });
+}
+
+/**
+ * Update specifically the task priority
+ */
+export async function updateTaskPriority(id: string, priority: TaskPriority): Promise<Task> {
+  return updateTask(id, { priority });
 }
 
 /**

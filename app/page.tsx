@@ -5,11 +5,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Navbar from '@/components/Navbar';
 import { TaskForm } from '@/components/tasks/TaskForm';
 import { TaskList } from '@/components/tasks/TaskList';
-import { Task, CreateTaskInput, TaskStatus } from '@/types/task';
+import { Task, CreateTaskInput, TaskStatus, TaskPriority } from '@/types/task';
 import {
   fetchTasks,
   createTask,
   updateTaskStatus,
+  updateTaskPriority,
   deleteTask,
 } from '@/services/taskApi';
 import { toast } from 'sonner';
@@ -129,17 +130,61 @@ export default function Home() {
     }
   };
 
-  const handlePriorityChange = async (id: string, newPriority: TaskStatus) => {
+  // 3b. Mutation: Update Task Priority (with Optimistic Updates)
+  const updatePriorityMutation = useMutation({
+    mutationFn: ({ id, priority }: { id: string; priority: TaskPriority }) =>
+      updateTaskPriority(id, priority),
+    onMutate: async ({ id, priority }) => {
+      await queryClient.cancelQueries({ queryKey: ['tasks'] });
+      const previousTasks = queryClient.getQueryData<Task[]>(['tasks']);
+
+      // Optimistically update the UI
+      if (previousTasks) {
+        queryClient.setQueryData<Task[]>(
+          ['tasks'],
+          previousTasks.map((t) => (t.id === id ? { ...t, priority } : t))
+        );
+      }
+
+      return { previousTasks };
+    },
+    onError: (err: unknown, _variables, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['tasks'], context.previousTasks);
+      }
+      const message =
+        err instanceof Error ? err.message : 'Unable to update priority';
+      toast.error('Update Failed', {
+        description: message,
+      });
+    },
+    onSuccess: (_data, { priority }) => {
+      const priorityLabels: Record<TaskPriority, string> = {
+        LOW: 'Low',
+        MEDIUM: 'Medium',
+        HIGH: 'High',
+      };
+      toast.success('Priority Updated', {
+        description: `Task priority set to "${priorityLabels[priority] || priority}".`,
+      });
+    },
+    onSettled: () => {
+      setUpdatingTaskId(null);
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+
+  const handlePriorityChange = async (id: string, newPriority: TaskPriority) => {
     const currentTask = tasks.find((t) => t.id === id);
     if (!currentTask || currentTask.priority === newPriority) return;
 
     setUpdatingTaskId(id);
     try {
-      await updateStatusMutation.mutateAsync({ id, status: newPriority });
+      await updatePriorityMutation.mutateAsync({ id, priority: newPriority });
     } catch {
       // Handled in onError
     }
-  }
+  };
 
   // 4. Mutation: Delete Task (with Optimistic Updates)
   const deleteTaskMutation = useMutation({
