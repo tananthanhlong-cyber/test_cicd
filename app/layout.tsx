@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
-import { Inter, Geist } from "next/font/google";
+import { Inter } from "next/font/google";
 
 import "./globals.css";
-import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+import { QueryProvider } from "@/providers/QueryProvider";
 
 export const metadata: Metadata = {
-  title: "Task Management System",
+  title: "TaskFlow | Task Management System",
   description: "Modern responsive Task Management Single Page Application",
 };
 
@@ -22,10 +20,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", inter.className, "font-sans", geist.variable)}
+      className={`h-full antialiased ${inter.className}`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
         <Toaster position="bottom-right" richColors />
       </body>
     </html>
