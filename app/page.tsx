@@ -129,6 +129,18 @@ export default function Home() {
     }
   };
 
+  const handlePriorityChange = async (id: string, newPriority: TaskStatus) => {
+    const currentTask = tasks.find((t) => t.id === id);
+    if (!currentTask || currentTask.priority === newPriority) return;
+
+    setUpdatingTaskId(id);
+    try {
+      await updateStatusMutation.mutateAsync({ id, status: newPriority });
+    } catch {
+      // Handled in onError
+    }
+  }
+
   // 4. Mutation: Delete Task (with Optimistic Updates)
   const deleteTaskMutation = useMutation({
     mutationFn: (id: string) => deleteTask(id),
@@ -191,7 +203,7 @@ export default function Home() {
         completedTasks={stats.completed}
       />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="flex-1 w-full max-w-360 mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Workspace Hero Header */}
         <section className="space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -237,6 +249,7 @@ export default function Home() {
                 isLoading={isLoading}
                 onRefresh={handleRefresh}
                 onStatusChange={handleStatusChange}
+                onPriorityChange={handlePriorityChange}
                 onDeleteTask={handleDeleteTask}
                 updatingTaskId={updatingTaskId}
               />

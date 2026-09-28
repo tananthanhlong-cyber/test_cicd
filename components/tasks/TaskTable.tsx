@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Task, TaskStatus } from '@/types/task';
+import { Task, TaskPriority, TaskStatus } from '@/types/task';
 import {
     Table,
     TableBody,
@@ -14,10 +14,12 @@ import { TaskStatusBadge } from './TaskStatusBadge';
 import { Button } from '@/components/ui/button';
 import { Trash2Icon, Loader2Icon, CalendarIcon } from 'lucide-react';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../ui/select';
+import { TaskPriorityBadge } from './TaskPriorityBadge';
 
 interface TaskTableProps {
     tasks: Task[];
-    onStatusChange: (id: string, newStatus: TaskStatus) => Promise<void>;
+    onStatusChange?: (id: string, newStatus: TaskStatus) => Promise<void>;
+    onPriorityChange?: (id: string, newPriority: TaskPriority) => Promise<void>;
     onDeleteClick: (task: Task) => void;
     updatingTaskId?: string | null;
 }
@@ -25,6 +27,7 @@ interface TaskTableProps {
 export const TaskTable: React.FC<TaskTableProps> = ({
     tasks,
     onStatusChange,
+    onPriorityChange,
     onDeleteClick,
     updatingTaskId,
 }) => {
@@ -85,7 +88,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                                             {isUpdating && <Loader2Icon className="size-3.5 animate-spin text-muted-foreground" />}
                                         </div>
 
-                                        <Select value={task.status} onValueChange={(value) => onStatusChange(task.id, value as TaskStatus)} disabled={isUpdating}>
+                                        <Select value={task.status} onValueChange={(value) => onStatusChange?.(task.id, value as TaskStatus)} disabled={isUpdating}>
                                             <SelectTrigger>
                                                 <SelectValue className="text-xs">
                                                     {task.status === 'TODO' && 'To Do'}
@@ -100,6 +103,34 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                                                             {status === 'TODO' && 'To Do'}
                                                             {status === 'IN_PROGRESS' && 'In Progress'}
                                                             {status === 'COMPLETED' && 'Completed'}
+                                                        </SelectItem>
+                                                    ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </TableCell>
+                                <TableCell className="py-3.5 align-top">
+                                    <div className="flex flex-col gap-1.5 items-start">
+                                        <div className="flex items-center gap-2">
+                                            <TaskPriorityBadge priority={task.priority} />
+                                            {isUpdating && <Loader2Icon className="size-3.5 animate-spin text-muted-foreground" />}
+                                        </div>
+
+                                        <Select value={task.priority} onValueChange={(value) => onPriorityChange?.(task.id, value as TaskPriority)} disabled={isUpdating}>
+                                            <SelectTrigger>
+                                                <SelectValue className="text-xs">
+                                                    {task.priority === 'LOW' && 'Low'}
+                                                    {task.priority === 'MEDIUM' && 'Medium'}
+                                                    {task.priority === 'HIGH' && 'High'}
+                                                </SelectValue>
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {
+                                                    Object.values(TaskPriority).map((priority) => (
+                                                        <SelectItem key={priority} value={priority}>
+                                                            {priority === 'LOW' && 'Low'}
+                                                            {priority === 'MEDIUM' && 'Medium'}
+                                                            {priority === 'HIGH' && 'High'}
                                                         </SelectItem>
                                                     ))}
                                             </SelectContent>

@@ -21,8 +21,8 @@ interface TaskFormProps {
 const taskSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(100, 'Title must be at most 100 characters'),
   description: z.string().max(1000, 'Description must be at most 1000 characters'),
-  status: z.enum(TaskStatus as unknown as [string, ...string[]]),
-  priority: z.enum(TaskPriority as unknown as [string, ...string[]]),
+  status: z.enum(TaskStatus),
+  priority: z.enum(TaskPriority),
 });
 
 export type TaskFormValues = z.infer<typeof taskSchema>;
@@ -100,13 +100,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, isSubmitting = fal
                   <FieldLabel>Status</FieldLabel>
                   <Select value={field.value} onValueChange={field.onChange} aria-invalid={fieldState.invalid}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="Select status" >
+                        {field.value === TaskStatus.TODO && 'To Do'}
+                        {field.value === TaskStatus.IN_PROGRESS && 'In Progress'}
+                        {field.value === TaskStatus.COMPLETED && 'Completed'}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
                         {Object.values(TaskStatus).map((status) => (
                           <SelectItem key={status} value={status}>
-                            {status}
+                            {status === 'TODO' && 'To Do'}
+                            {status === 'IN_PROGRESS' && 'In Progress'}
+                            {status === 'COMPLETED' && 'Completed'}
                           </SelectItem>
                         ))}
                       </SelectGroup>
@@ -126,13 +132,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, isSubmitting = fal
                   <FieldLabel>Priority</FieldLabel>
                   <Select value={field.value} onValueChange={field.onChange} aria-invalid={fieldState.invalid}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select priority" />
+                      <SelectValue placeholder="Select priority" >
+                        {field.value === TaskPriority.LOW && 'Low'}
+                        {field.value === TaskPriority.MEDIUM && 'Medium'}
+                        {field.value === TaskPriority.HIGH && 'High'}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
                         {Object.values(TaskPriority).map((priority) => (
                           <SelectItem key={priority} value={priority}>
-                            {priority}
+                            {priority === 'LOW' && 'Low'}
+                            {priority === 'MEDIUM' && 'Medium'}
+                            {priority === 'HIGH' && 'High'}
                           </SelectItem>
                         ))}
                       </SelectGroup>
