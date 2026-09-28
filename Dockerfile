@@ -20,10 +20,7 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN \
-    if [ -f package-lock.json ]; then npm ci; \
-    else npm install; \
-    fi
+RUN npm run build
 
 # Stage 3: Create the production image
 
@@ -33,11 +30,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -u 1001 -S nextjs -G nodejs
+
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
